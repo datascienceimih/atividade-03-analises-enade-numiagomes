@@ -1,0 +1,160 @@
+---
+title: "Projeto Integrador - Exercício 3"
+output: html_notebook
+---
+```{r}
+
+#carregando outros pacootes necessários
+library(readr)
+library(dplyr)
+library(descr)
+
+enade14<-read.csv2("https://raw.githubusercontent.com/neylsoncrepalde/introducao_ao_r/master/dados/enade_2014_amostra.csv")
+head(enade14)
+
+#investigando banco de dados
+#dimansão
+dim(enade14)
+
+#nomes
+names(enade14)#consultar o dicionário de variáveis
+```
+
+Exercício número 1
+```{r}
+summary(enade14$nu_idade)
+var(enade14$nu_idade)
+sd(enade14$nu_idade)
+hist(enade14$nu_idade, col="blue",main = "Idade dos alunos - Enade 2014")
+```
+Neste gráfico pademos ver que existe uma maior concentração de estudantes entre os 20 e 30 anos, e que existe um decaímento na quantidades de alunos quando a idade torna-se maior, podemos observar uma pequena quantidade de alunos com menos de 20 anos.  Esse comportamento, provavelmente já é esperado quando pensamos nos respondentes como alunos de cursos de graduação.
+
+Exercício número 2
+```{r}
+#Cor/Raça - qe_i1
+freq(enade14$qe_i2)
+```
+Podemos ver que a quantidade alunos que se declaram brancos é muito mais expressiva que a demais, passando dos 50%, sendo maior que a soma das demais raças. Mostrando que existe uma grade desigualdade racial para estudantes universitarios.
+
+Exercício número 3
+
+```{r}
+
+##criando uma variável, nela vamos c=substituir as alternativas c, d, e por NA
+
+enade14$est_civil1 = enade14$qe_i1
+
+enade14$est_civil1[enade14$est_civil1 == "c"]<- NA
+enade14$est_civil1[enade14$est_civil1 == "d"]<- NA
+enade14$est_civil1[enade14$est_civil1 == "e"]<- NA
+
+freq(enade14$est_civil1)
+
+
+### outra maneira usando dplyr
+novoenade14 = enade14 %>% mutate(est_civil = qe_i1)%>% # criando uma nova variável com o pacote dplyr
+  filter(est_civil == "a" | est_civil == "b")
+
+freq(novoenade14$est_civil)
+
+######## outra maneira 
+solteiros_casados = enade14$qe_i1[enade14$qe_i1 == "a"
+                                  |enade14$qe_i1 == "b"]
+freq(solteiros_casados) 
+```
+
+Exercício número 4
+
+```{r}
+summary(enade14$nt_obj_fg)
+var(na.omit(enade14$nt_obj_fg))
+sd(na.omit(enade14$nt_obj_fg))
+boxplot(enade14$nt_obj_fg,main = "Nota Geral dos alunos - Enade 2014",
+        xlab = "Nota Geral", ylab = "Frequência")
+```
+
+O melhor gráfico para apresentar as estatísticas descritas é o boxplot, nele podemos ver de forma ilustativa como foi a distribuição das notas de maneira geral. Neste caso, podemos ver que existe uma assimetria positiva na distribuição das notas, também observamos que a amplitude os dados é grande e que não existem outliers.
+
+Exercício número 5
+
+```{r}
+enade14$publica = enade14$co_catad
+
+enade14$publica[enade14$publica == 93] = 1
+enade14$publica[enade14$publica == 116] = 1
+enade14$publica[enade14$publica == 118] = 0
+enade14$publica[enade14$publica == 121] = 0
+enade14$publica[enade14$publica == 10001] = 1
+enade14$publica[enade14$publica == 10002] = 1
+enade14$publica[enade14$publica == 10003] = 1
+enade14$publica[enade14$publica == 10004] = 0
+enade14$publica[enade14$publica == 10005] = 0
+enade14$publica[enade14$publica == 10006] = 0
+enade14$publica[enade14$publica == 10007] = 0
+enade14$publica[enade14$publica == 10008] = 0
+enade14$publica[enade14$publica == 10009] = 0
+
+escolaPubli<- enade14$publica[enade14$publica == "1"] 
+
+escolaPart<- enade14$publica[enade14$publica == "0"] 
+
+
+freq(enade14$publica)
+```
+
+Exercício número 6
+
+```{r}
+renda <- enade14$qe_i8
+
+barplot(table(renda),main = "Renda dos alunos - Enade 2014",
+        xlab = "Renda (em salários mínimos)", ylab = "Frequência")
+
+rendapubli <-enade14$qe_i8[enade14$publica == "1"]
+barplot(table(rendapubli),main = "Renda dos alunos de escola Pública - Enade 2014",
+        xlab = "Renda (em salários mínimos)", ylab = "Frequência")
+
+rendapart <-enade14$qe_i8[enade14$publica == "0"]
+barplot(table(rendapart),main = "Renda dos alunos de escola Particular - Enade 2014",
+        xlab = "Renda (em salários mínimos)", ylab = "Frequência")
+```
+
+Exercício número 7
+
+```{r}
+nt_publica <- enade14$nt_ger[enade14$publica == '1']
+nt_publica
+
+nt_particular <- enade14$nt_ger[enade14$publica == '0']
+nt_particular
+```
+
+Bônus
+
+Bônus número 1
+
+```{r}
+t.test(enade14$nt_ger)
+```
+Já que temos o valor-p menor que o nível de significancia, rejeitamos a hipotese de que a média é igual a zero.
+
+Bônus número 2
+
+```{r}
+nt_publica <- enade14$nt_ger[enade14$publica == '1']
+
+media_pub = mean(nt_publica, na.rm = T)
+
+
+
+nt_particular <- enade14$nt_ger[enade14$publica == '0']
+
+media_par = mean(nt_particular, na.rm = T)
+
+
+
+t.test(nt_publica, nt_particular,alternative = c("two.sided"))
+```
+
+Como o valor-p é menor que o nível de significância rejeitamos a hipotese nula de que as médias são estatísticamente iguais. Desta forma concluimos que esxiste diferença significante entre as médias das escolas públicas e privadas.
+
